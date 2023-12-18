@@ -57,8 +57,8 @@ void receiveEvent(int numBytesReceived) {
 }
 
 void measureCurrent() {
-  float current1 = analogRead(IPROPI1) * (3.3f / 1024) * (1500.f/910.f);
-  float current2 = analogRead(IPROPI2) * (3.3f / 1024) * (1500.f/910.f);
+  float current1 = analogRead(IPROPI1) * (3.3f / 1024) / (0.0015f * 910.f);
+  float current2 = analogRead(IPROPI2) * (3.3f / 1024) / (0.0015f * 910.f);
   //Serial.print("IPROPI: ");
   //Serial.println(analogRead(IPROPI2));
   Serial.print("Current 1: ");
