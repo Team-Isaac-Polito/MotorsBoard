@@ -9,8 +9,8 @@ Motor m1(DRV_IN11, DRV_IN21);
 Motor m2(DRV_IN12, DRV_IN22);
 
 void measureCurrent() {
-  float current1 = analogRead(IPROPI1) * (3.3f / 1024) * (1500.f/910.f);
-  float current2 = analogRead(IPROPI2) * (3.3f / 1024) * (1500.f/910.f);
+  float current1 = analogRead(IPROPI1) * (3.3f / 1024) / (0.0015f * 910.f);
+  float current2 = analogRead(IPROPI2) * (3.3f / 1024) / (0.0015f * 910.f);
   Serial.print("Current: ");
   Serial.print(current1);
   Serial.print(" A, Current 2: ");
