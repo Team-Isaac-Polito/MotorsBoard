@@ -11,6 +11,9 @@ TMP102 tsens;
 Motor m1(DRV_IN11, DRV_IN21);
 Motor m2(DRV_IN12, DRV_IN22);
 
+/* Current feedback is evaluated from the measurement of voltage on 
+the IPROPI resistor, formula is from the driver datasheet.
+It only works when 12V is supplied to the board.*/
 void measureCurrent() {
   float current1 = analogRead(IPROPI1) * (3.3f / 1024) / (0.0015f * 910.f);
   float current2 = analogRead(IPROPI2) * (3.3f / 1024) / (0.0015f * 910.f);
@@ -21,6 +24,8 @@ void measureCurrent() {
   Serial.println(" A");
 }
 
+/* Temperature on the motor is given by the thermistor NTC formula.
+It only works when 12V is supplied since VREF relies on it.*/
 void measureTempMotor(byte MTEMP){
   float Vm = analogRead(MTEMP) * VREF/1024;
   float R = R2 * (VREF/Vm - 1); // Resistance of the NTC
@@ -50,12 +55,15 @@ void setup() {
   m2.begin();
 }
 
+/*From the example for the SparkFunTMP102 sensor*/
 void measureTempBoard() {
   float temperature = tsens.readTempC();
-  Serial.print("Temperature: ");
+  Serial.print("Temperature on the board: ");
   Serial.println(temperature);
 }
 
+/*Not for motor operation with PID, use if(millis() - t < ms){}
+in the loop() instead to avoid blocking motor execution*/
 void delayCurrent(int ms) {
   int t = millis();
   while(millis() - t < ms) {
