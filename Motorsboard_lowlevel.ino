@@ -3,12 +3,12 @@
 
 SmartMotor motorTrLeft(DRV_TR_LEFT_PWM, DRV_TR_LEFT_DIR, ENC_TR_LEFT_A, ENC_TR_LEFT_B, false, pio1);
 SmartMotor motorTrRight(DRV_TR_RIGHT_PWM, DRV_TR_RIGHT_DIR, ENC_TR_RIGHT_A, ENC_TR_RIGHT_B, true, pio1);
-Motor m1(DRV_TR_LEFT_PWM, DRV_TR_LEFT_DIR);
-Motor m2(DRV_TR_RIGHT_PWM, DRV_TR_RIGHT_DIR);
-TractionEncoder e1(ENC_TR_LEFT_A, ENC_TR_LEFT_B, new MovingAvgFilter<int>(ENC_TR_SAMPLES));
-TractionEncoder e2(ENC_TR_RIGHT_A, ENC_TR_RIGHT_B, new MovingAvgFilter<int>(ENC_TR_SAMPLES), true);
-PID pid1(0.f, 0.f, 0.f, MAX_SPEED, 1.f);
-PID pid2(0.f, 0.f, 0.f, MAX_SPEED, 1.f);
+// Motor m1(DRV_TR_LEFT_PWM, DRV_TR_LEFT_DIR);
+// Motor m2(DRV_TR_RIGHT_PWM, DRV_TR_RIGHT_DIR);
+// TractionEncoder e1(ENC_TR_LEFT_A, ENC_TR_LEFT_B, new MovingAvgFilter<int>(ENC_TR_SAMPLES));
+// TractionEncoder e2(ENC_TR_RIGHT_A, ENC_TR_RIGHT_B, new MovingAvgFilter<int>(ENC_TR_SAMPLES), true);
+// PID pid1(0.f, 0.f, 0.f, MAX_SPEED, 1.f);
+// PID pid2(0.f, 0.f, 0.f, MAX_SPEED, 1.f);
 
 void measureCurrent() {
 
@@ -41,17 +41,17 @@ void setup() {
   analogWriteRange(PWM_MAX_VALUE);  // analogWrite range from 0 to 512, default is 255
 
   // motor initialization
-  // motorTrLeft.begin();
-  // motorTrRight.begin();
+  motorTrLeft.begin();
+  motorTrRight.begin();
 
-  // motorTrLeft.calibrate();
-  // motorTrRight.calibrate();
+  motorTrLeft.calibrate();
+  motorTrRight.calibrate();
 
   // m1.begin();
   // m2.begin();
 
-  e1.begin();
-  e2.begin();
+  // e1.begin();
+  // e2.begin();
 
   //Debug.println("BEGIN", Levels::INFO);
 }
@@ -75,17 +75,17 @@ void printEnc(){
 void loop() {
 
   // update motors
-  // motorTrLeft.update();
-  // motorTrRight.update();
-  // Serial.println("Motors updated");
+  motorTrLeft.update();
+  motorTrRight.update();
+  Serial.println("Motors updated");
 
-  // motorTrLeft.setSpeed(65);
-  // motorTrRight.setSpeed(30);
+  motorTrLeft.setSpeed(65);
+  motorTrRight.setSpeed(30);
 
-  // Debug.print("TRACTION DATA :  \tleft: \t");
-  // Debug.print(motorTrLeft.getSpeed());
-  // Debug.print("\tright: \t");
-  // Debug.println(motorTrRight.getSpeed());
+  Debug.print("TRACTION DATA :  \tleft: \t");
+  Debug.print(motorTrLeft.getSpeed());
+  Debug.print("\tright: \t");
+  Debug.println(motorTrRight.getSpeed());
 
   // m1.write(200);
   // m2.write(100);
@@ -93,9 +93,9 @@ void loop() {
 
   delayCurrent(4000);
 
-  //Debug.println("Stopping motors.", Levels::INFO);
-  // motorTrLeft.stop();
-  // motorTrRight.stop();
+  // Debug.println("Stopping motors.", Levels::INFO);
+  motorTrLeft.stop();
+  motorTrRight.stop();
 
-  // delayCurrent(1000);
+  delayCurrent(1000);
 }
