@@ -1,14 +1,8 @@
 #include "SmartMotor.h"
 #include "definitions.h"
 
-SmartMotor motorTrLeft(DRV_TR_LEFT_PWM, DRV_TR_LEFT_DIR, ENC_TR_LEFT_A, ENC_TR_LEFT_B, false, pio1);
-SmartMotor motorTrRight(DRV_TR_RIGHT_PWM, DRV_TR_RIGHT_DIR, ENC_TR_RIGHT_A, ENC_TR_RIGHT_B, true, pio1);
-// Motor m1(DRV_TR_LEFT_PWM, DRV_TR_LEFT_DIR);
-// Motor m2(DRV_TR_RIGHT_PWM, DRV_TR_RIGHT_DIR);
-// TractionEncoder e1(ENC_TR_LEFT_A, ENC_TR_LEFT_B, new MovingAvgFilter<int>(ENC_TR_SAMPLES));
-// TractionEncoder e2(ENC_TR_RIGHT_A, ENC_TR_RIGHT_B, new MovingAvgFilter<int>(ENC_TR_SAMPLES), true);
-// PID pid1(0.f, 0.f, 0.f, MAX_SPEED, 1.f);
-// PID pid2(0.f, 0.f, 0.f, MAX_SPEED, 1.f);
+SmartMotor motorTrLeft(DRV_TR_LEFT_PWM, DRV_TR_LEFT_DIR, ENC_TR_LEFT_A, ENC_TR_LEFT_B, false);
+SmartMotor motorTrRight(DRV_TR_RIGHT_PWM, DRV_TR_RIGHT_DIR, ENC_TR_RIGHT_A, ENC_TR_RIGHT_B, true);
 
 void measureCurrent() {
 
@@ -44,14 +38,9 @@ void setup() {
   motorTrLeft.begin();
   motorTrRight.begin();
 
-  motorTrLeft.calibrate();
-  motorTrRight.calibrate();
-
-  // m1.begin();
-  // m2.begin();
-
-  // e1.begin();
-  // e2.begin();
+  //Calibration needs motor connected to work
+  // motorTrLeft.calibrate();
+  // motorTrRight.calibrate();
 
   //Debug.println("BEGIN", Levels::INFO);
 }
@@ -60,25 +49,32 @@ void delayCurrent(int ms) {
   int t = millis();
   while (millis() - t < ms) {
     measureCurrent();
-    printEnc();
+    // printEnc();
     delay(100);
   }
 }
 
 void printEnc(){
-  Serial.print("speed e1: ");
-  Serial.println(e1.getSpeed());
-  Serial.print("speed e2: ");
-  Serial.println(e2.getSpeed());
+  Serial.print("speed left: ");
+  Serial.println(motorTrLeft.getSpeed());
+  Serial.print("speed right: ");
+  Serial.println(motorTrRight.getSpeed());
 }
 
 void loop() {
+  int t = millis();
+
+  //Condition to avoid the use of delay()
+  if(millis() - t < 100){
+    measureCurrent();
+    printEnc();
+  }
 
   // update motors
   motorTrLeft.update();
   motorTrRight.update();
-  Serial.println("Motors updated");
 
+  //TODO: speed should be sent from the core managing i2c to the core managing pid
   motorTrLeft.setSpeed(65);
   motorTrRight.setSpeed(30);
 
@@ -87,15 +83,8 @@ void loop() {
   Debug.print("\tright: \t");
   Debug.println(motorTrRight.getSpeed());
 
-  // m1.write(200);
-  // m2.write(100);
-  
-
-  delayCurrent(4000);
-
   // Debug.println("Stopping motors.", Levels::INFO);
-  motorTrLeft.stop();
-  motorTrRight.stop();
+  // motorTrLeft.stop();
+  // motorTrRight.stop();
 
-  delayCurrent(1000);
 }
