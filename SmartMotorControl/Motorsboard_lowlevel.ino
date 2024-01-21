@@ -53,7 +53,7 @@ void delayCurrent(int ms) {
     delay(100);
   }
 }
-
+//Redundant
 void printEnc(){
   Serial.print("speed left: ");
   Serial.println(motorTrLeft.getSpeed());
