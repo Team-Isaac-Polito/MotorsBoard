@@ -1,3 +1,6 @@
+/* MotorsBoard code to test motors, current feedback, 
+temperature sensors on board and on the motor*/
+
 #include <Wire.h>
 #include <SparkFunTMP102.h>
 #include "pin_definitions.h"
@@ -18,6 +21,17 @@ void measureCurrent() {
   Serial.println(" A");
 }
 
+void measureTempMotor(byte MTEMP){
+  float Vm = analogRead(MTEMP) * VREF/1024;
+  float R = R2 * (VREF/Vm - 1); // Resistance of the NTC
+  float temperature = BETA/(log(R/R0) + BETA/T0);
+   // Linearizing this function makes the adc read a lower temperature
+   // than the real one when it rises over 70°C
+   Serial.print("Motor Temp: ");
+   Serial.print(temperature - 273.15);
+   Serial.println("°C");
+}
+
 void setup() {
   Serial.begin(115200);
 
@@ -36,7 +50,7 @@ void setup() {
   m2.begin();
 }
 
-void measureTemperature() {
+void measureTempBoard() {
   float temperature = tsens.readTempC();
   Serial.print("Temperature: ");
   Serial.println(temperature);
@@ -46,7 +60,9 @@ void delayCurrent(int ms) {
   int t = millis();
   while(millis() - t < ms) {
     measureCurrent();
-    measureTemperature();
+    measureTempBoard();
+    measureTempMotor(MTEMP1);
+    measureTempMotor(MTEMP2);
     delay(100);
   }
 }
