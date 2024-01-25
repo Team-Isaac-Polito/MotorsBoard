@@ -11,9 +11,13 @@
 #define PWM_MAX_VALUE 1023
 #define PWM_FREQUENCY 15000
 
-// I²C configuration
-#define I2C_SENS_SDA   18
-#define I2C_SENS_SCL   19
+// I²C connected to main board
+#define SDA2 8
+#define SCL2 9
+
+// I²C connected to sensors
+#define SDA1 20
+#define SCL1 21
 
 #define ABSOLUTE_ENCODER_ADDRESS 0x40 // ToDo check, maybe 0x44
 

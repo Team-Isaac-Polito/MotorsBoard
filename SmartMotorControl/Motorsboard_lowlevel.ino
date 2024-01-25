@@ -39,26 +39,10 @@ void setup() {
   motorTrRight.begin();
 
   //Calibration needs motor connected to work
-  // motorTrLeft.calibrate();
-  // motorTrRight.calibrate();
+  motorTrLeft.calibrate();
+  motorTrRight.calibrate();
 
   //Debug.println("BEGIN", Levels::INFO);
-}
-
-void delayCurrent(int ms) {
-  int t = millis();
-  while (millis() - t < ms) {
-    measureCurrent();
-    // printEnc();
-    delay(100);
-  }
-}
-//Redundant
-void printEnc(){
-  Serial.print("speed left: ");
-  Serial.println(motorTrLeft.getSpeed());
-  Serial.print("speed right: ");
-  Serial.println(motorTrRight.getSpeed());
 }
 
 void loop() {
