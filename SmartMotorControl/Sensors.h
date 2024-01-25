@@ -12,11 +12,13 @@ class Sensors
 {
 public:
     void begin();
-    void measureCurrent();
-    void measureTempBoard();
-    void measureTempMotor(byte MTEMP);
+
+    float measureCurrent(byte IPROPI);
+    float measureTempMotor(byte MTEMP);
+    float measureTempBoard();
 
 private:
+
 }
 
 #endif

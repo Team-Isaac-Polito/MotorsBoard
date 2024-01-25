@@ -7,6 +7,7 @@
 #include "TractionEncoder.h"
 #include "PID.h"
 #include "MovingAvgFilter.h"
+#include "Sensors.h"
 
 /**
  * Class used to control DC motors at a constant speed.
@@ -30,6 +31,7 @@ class SmartMotor {
     Motor motor;
     TractionEncoder encoder;
     PID pid;
+    Sensors sensors;
 
     bool invert;
     float speed;

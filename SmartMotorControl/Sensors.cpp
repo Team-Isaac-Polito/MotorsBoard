@@ -10,27 +10,27 @@ void Sensors::begin()
   {
     Serial.println("Cannot connect to TMP102.");
     Serial.println("Is the board connected? Is the device ID correct?");
-    while (1);
+    //while (1);
   }
 }
 
 /* Current feedback is evaluated from the measurement of voltage on
 the IPROPI resistor, formula is from the driver datasheet.
 It only works when 12V is supplied to the board.*/
-void Sensors::measureCurrent()
+float Sensors::measureCurrent(byte IPROPI)
 {
-  float current1 = analogRead(IPROPI1) * (3.3f / 1024) / (0.0015f * 910.f);
-  float current2 = analogRead(IPROPI2) * (3.3f / 1024) / (0.0015f * 910.f);
+  float current = analogRead(IPROPI) * (3.3f / 1024) / (0.0015f * 910.f);
   Serial.print("Current: ");
-  Serial.print(current1);
-  Serial.print(" A, Current 2: ");
-  Serial.print(current2);
-  Serial.println(" A");
+  Serial.print(current);
+  Serial.print(" A");
+  // TODO: add moving avg filter
+
+  return current;
 }
 
 /* Temperature on the motor is given by the thermistor NTC formula.
 It only works when 12V is supplied since VREF relies on it.*/
-void Sensors::measureTempBoard()
+float Sensors::measureTempMotor(byte MTEMP)
 {
   float Vm = analogRead(MTEMP) * VREF / 1024;
   float R = R2 * (VREF / Vm - 1); // Resistance of the NTC
@@ -40,12 +40,16 @@ void Sensors::measureTempBoard()
   Serial.print("Motor Temp: ");
   Serial.print(temperature - 273.15);
   Serial.println("°C");
+
+  return temperature - 273.15;
 }
 
 /*From the example for the SparkFunTMP102 sensor*/
-void Sensors::measureTempMotor(byte MTEMP)
+float Sensors::measureTempBoard()
 {
   float temperature = tsens.readTempC();
   Serial.print("Temperature on the board: ");
   Serial.println(temperature);
+
+  return temperature;
 }

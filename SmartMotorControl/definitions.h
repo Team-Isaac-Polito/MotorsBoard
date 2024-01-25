@@ -28,24 +28,25 @@
 #define BAT_R1 10000
 #define BAT_R2 3300
 
-// Motors pins
+// Motor 1 pins
 #define DRV_TR_LEFT_DIR  25
 #define DRV_TR_LEFT_PWM  24
+#define ENC_TR_LEFT_A   22
+#define ENC_TR_LEFT_B   23
 #define IPROPI1 28 // current feedback
+#define MTEMP1 29 // temperature feedback
 
+//Motor 2 pins
 #define DRV_TR_RIGHT_DIR  17
 #define DRV_TR_RIGHT_PWM  16
+#define ENC_TR_RIGHT_A  18
+#define ENC_TR_RIGHT_B  19
 #define IPROPI2 26 // current feedback
+#define MTEMP2 27 // temperature feedback
+
 
 // Motor configuration
 #define MAX_SPEED 65.f
-
-// Encoder pins
-#define ENC_TR_LEFT_A   22
-#define ENC_TR_LEFT_B   23
-
-#define ENC_TR_RIGHT_A  18
-#define ENC_TR_RIGHT_B  19
 
 // Encoder conversion constant
 // K = 100          *       10^6        *       60      / (     48   *             74,83                    *       2 )

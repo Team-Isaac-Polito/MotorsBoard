@@ -14,36 +14,57 @@ SmartMotor::SmartMotor(byte pwm, byte dir, byte enc_a, byte enc_b, bool invert, 
       encoder(enc_a, enc_b, new MovingAvgFilter<int>(ENC_TR_SAMPLES), invert, pio),
       pid(0.f, 0.f, 0.f, MAX_SPEED, 1.f),
       invert(invert)
-{}
+{
+}
 
 /**
  * Initialize SmartMotor and necessary components.
  */
-void SmartMotor::begin() {
+void SmartMotor::begin()
+{
     motor.begin();
     encoder.begin();
+    sensors.begin();
 }
 
 /**
  * Update routine, updating the PID and the motor speed.
  * This function will be executed at a fixed rate, defined by DT_PID, and should therefore be called as often as possible.
  */
-void SmartMotor::update() {
+void SmartMotor::update()
+{
     unsigned long now = millis();
-    if(now - pid_last > DT_PID) {
+    if (now - pid_last > DT_PID)
+    {
         pid.updateFeedback(getSpeed());
         pid.calculate();
         motor.write(speedToPower(pid.getOutput()));
         pid_last = now;
+
+        // Sensors measurements
+    
+        sensors.measureCurrent(IPROPI1);
+        sensors.measureCurrent(IPROPI2);
+
+        if(sensors.measureTempMotor(MTEMP1) > 50.f){
+            motor.write(0);
+            Debug.println("Motor overheated");
+        }
+        
+        sensors.measureTempMotor(MTEMP2);
+        sensors.measureTempBoard();
+
+        // TODO:test overheating control
+        //TODO: which motor is printing?
     }
-    //TODO: add temp and current measurements here
 }
 
 /**
  * Set the desired speed of the motor.
  * @param value Desired motor speed between -MAX_SPEED and MAX_SPEED.
  */
-void SmartMotor::setSpeed(float value) {
+void SmartMotor::setSpeed(float value)
+{
     pid.updateReferenceValue(value);
 }
 
@@ -52,10 +73,12 @@ void SmartMotor::setSpeed(float value) {
  * The value is only updated at a fixed rate, defined by DT_ENC, to avoid losing precision.
  * @return float Current speed of the motor between -MAX_SPEED and MAX_SPEED.
  */
-float SmartMotor::getSpeed() {
+float SmartMotor::getSpeed()
+{
     unsigned long now = millis();
-    if(now - enc_last > DT_ENC) {
-        speed = (float)(encoder.getSpeed())/100.f;
+    if (now - enc_last > DT_ENC)
+    {
+        speed = (float)(encoder.getSpeed()) / 100.f;
         enc_last = now;
     }
     return speed;
@@ -65,7 +88,8 @@ float SmartMotor::getSpeed() {
  * Stop the motor.
  * This function will stop the motor and reset the PID.
  */
-void SmartMotor::stop() {
+void SmartMotor::stop()
+{
     motor.write(0);
     pid.updateReferenceValue(0.f);
     pid.resetState();
@@ -78,21 +102,24 @@ void SmartMotor::stop() {
  * Only the Kp and Ki gains are computed while the Kd gain is set to 0 since it doesn't have a positive effect on controlling the motor.
  * @param target Target speed to use for calibration.
  */
-void SmartMotor::calibrate(float target) {
+void SmartMotor::calibrate(float target)
+{
     float th = target + 5.f;
     float tl = target - 5.f;
 
     motor.write(PWM_MAX_VALUE);
-    while(getSpeed() < th) delay(DT_ENC);
+    while (getSpeed() < th)
+        delay(DT_ENC);
     int t_high = millis();
     float val_high = getSpeed();
     motor.write(0);
-    while(getSpeed() > tl) delay(DT_ENC);
+    while (getSpeed() > tl)
+        delay(DT_ENC);
     int t_low = millis();
     float val_low = getSpeed();
 
-    float tu = (float)(t_low - t_high)/1000.f;
-    float amplitude = (val_high - val_low)/2.f;
+    float tu = (float)(t_low - t_high) / 1000.f;
+    float amplitude = (val_high - val_low) / 2.f;
     float ku = 4.f * MAX_SPEED / (PI * amplitude);
 
     float ti = 0.83f * tu;
@@ -112,6 +139,7 @@ void SmartMotor::calibrate(float target) {
  * @param speed Theretical speed of the motor.
  * @return int PWM value to set the motor to.
  */
-int SmartMotor::speedToPower(float speed) {
-    return (speed/MAX_SPEED)*PWM_MAX_VALUE;
+int SmartMotor::speedToPower(float speed)
+{
+    return (speed / MAX_SPEED) * PWM_MAX_VALUE;
 }
