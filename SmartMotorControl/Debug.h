@@ -2,7 +2,6 @@
 #define DEBUG_H
 
 #include <Arduino.h>
-#include "Debug.h"
 
 enum class Levels{
   OFF, WARN, INFO, DEBUG

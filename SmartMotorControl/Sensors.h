@@ -6,7 +6,7 @@
 #include "definitions.h"
 #include "Constants.h"
 
-TMP102 tsens;
+
 
 class Sensors
 {
@@ -18,7 +18,8 @@ public:
     float measureTempBoard();
 
 private:
+TMP102 tsens;
 
-}
+};
 
 #endif
