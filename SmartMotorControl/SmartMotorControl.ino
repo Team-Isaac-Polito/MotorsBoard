@@ -1,33 +1,11 @@
 #include "SmartMotor.h"
 
-SmartMotor motorTrLeft(DRV_TR_LEFT_PWM, DRV_TR_LEFT_DIR, ENC_TR_LEFT_A, ENC_TR_LEFT_B, false);
-SmartMotor motorTrRight(DRV_TR_RIGHT_PWM, DRV_TR_RIGHT_DIR, ENC_TR_RIGHT_A, ENC_TR_RIGHT_B, true);
-
-// void measureCurrent() {
-
-//   float current1, current2, current1_tot, current2_tot;
-//   int AVG = 50;
-
-//   for (int i = 0; i < AVG; i++) {
-//     current1_tot += analogRead(IPROPI1) * (3.3f / 1024) / (0.0015f * 910.f);
-//     current2_tot += analogRead(IPROPI2) * (3.3f / 1024) / (0.0015f * 910.f);
-//     delay(10);
-//   }
-
-//   current1 = current1_tot / AVG;
-//   current2 = current2_tot / AVG;
-//   //Serial.print("IPROPI: ");
-//   //Serial.println(analogRead(IPROPI2));
-//   Serial.print("Current 1: ");
-//   Serial.print(current1);
-//   Serial.print("A, Current 2: ");
-//   Serial.print(current2);
-//   Serial.println("A");
-// }
+SmartMotor motorTrLeft(DRV_TR_LEFT_PWM, DRV_TR_LEFT_DIR, ENC_TR_LEFT_A, ENC_TR_LEFT_B, IPROPI1, MTEMP1, false);
+SmartMotor motorTrRight(DRV_TR_RIGHT_PWM, DRV_TR_RIGHT_DIR, ENC_TR_RIGHT_A, ENC_TR_RIGHT_B, IPROPI2, MTEMP2, true);
 
 void setup() {
   Serial.begin(9600);
-  //Debug.setLevel(Levels::DEBUG);  // comment to set debug verbosity to debug
+  Debug.setLevel(Levels::DEBUG);  // comment to set debug verbosity to debug
 
   // initializing PWM
   analogWriteFreq(PWM_FREQUENCY);   // switching frequency to 15kHz
@@ -38,16 +16,14 @@ void setup() {
   motorTrRight.begin();
 
   //Calibration needs motor connected to work
-  //motorTrLeft.calibrate();
-  //motorTrRight.calibrate();
+  motorTrLeft.calibrate();
+  motorTrRight.calibrate();
 
-  //Debug.println("BEGIN", Levels::INFO);
+  Debug.println("BEGIN", Levels::INFO);
 }
 
 void loop() {
   int t = millis();
-
-  
 
   // update motors
   motorTrLeft.update();
@@ -60,12 +36,22 @@ void loop() {
 
 //Condition to avoid the use of delay()
   if(millis() - t < 100){
-    // measureCurrent();
-    // printEnc();
   Debug.print("TRACTION DATA :  \tleft: \t");
   Debug.print(motorTrLeft.getSpeed());
   Debug.print("\tright: \t");
   Debug.println(motorTrRight.getSpeed());
+  Debug.print("CURRENTS DATA :  \tleft: \t");
+  Debug.print(motorTrLeft.getCurrent());
+  Debug.print("\tright: \t");
+  Debug.println(motorTrRight.getCurrent());
+  Debug.print("MOTOR TEMPERATURE DATA :  \tleft: \t");
+  Debug.print(motorTrLeft.getTempMotor());
+  Debug.print("\tright: \t");
+  Debug.println(motorTrRight.getTempMotor());
+  Debug.print("BOARD TEMPERATURE DATA :  \tleft: \t");
+  Debug.print(motorTrLeft.getTempBoard());
+  Debug.print("\tright: \t");
+  Debug.println(motorTrRight.getTempBoard());
   }
 
   // Debug.println("Stopping motors.", Levels::INFO);

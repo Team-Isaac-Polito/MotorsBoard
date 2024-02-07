@@ -9,11 +9,12 @@
  * @param invert Invert motor direction, usuful when motors are mounted opposite to one another.
  * @param pio PIO to use for the encoder. Each PIO can handle up to 4 encoders.
  */
-SmartMotor::SmartMotor(byte pwm, byte dir, byte enc_a, byte enc_b, bool invert, PIO pio)
+SmartMotor::SmartMotor(byte pwm, byte dir, byte enc_a, byte enc_b, byte ipropi, byte mtemp, bool invert, PIO pio)
     : motor(pwm, dir, invert),
       encoder(enc_a, enc_b, new MovingAvgFilter<int>(ENC_TR_SAMPLES), invert, pio),
       pid(0.f, 0.f, 0.f, MAX_SPEED, 1.f),
-      invert(invert)
+      invert(invert),
+      sensors(ipropi, mtemp)
 {
 }
 
@@ -41,22 +42,37 @@ void SmartMotor::update()
         motor.write(speedToPower(pid.getOutput()));
         pid_last = now;
 
-        // Sensors measurements
-    
-        sensors.measureCurrent(IPROPI1);
-        sensors.measureCurrent(IPROPI2);
-
-        if(sensors.measureTempMotor(MTEMP1) > 50.f){
-            motor.write(0);
-            Debug.println("Motor overheated");
-        }
-        
-        sensors.measureTempMotor(MTEMP2);
+        // Sensors measurements. Warning: functions get called for each motor
+        sensors.measureCurrent();
+        sensors.measureTempMotor();
         sensors.measureTempBoard();
 
+        if (sensors.getTempMotor() > 40)
+        {
+            motor.write(0);
+            Serial.println("Motor overheating");
+        }
+
         // TODO:test overheating control
-        //TODO: which motor is printing?
     }
+}
+
+// Get temperature of the motor
+float SmartMotor::getTempMotor()
+{
+  return this->sensors.getTempMotor();
+}
+
+// Get how much current the motor is drawing
+float SmartMotor::getCurrent()
+{
+  return this->sensors.getCurrent();
+}
+
+// Get the temperature on the board
+float SmartMotor::getTempBoard()
+{
+  return this->sensors.getTempBoard();
 }
 
 /**

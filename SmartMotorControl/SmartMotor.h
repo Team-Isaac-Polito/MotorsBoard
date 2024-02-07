@@ -15,7 +15,7 @@
  */
 class SmartMotor {
   public:
-    SmartMotor(byte pwm, byte dir, byte enc_a, byte enc_b, bool invert = false, PIO pio = pio0);
+    SmartMotor(byte pwm, byte dir, byte enc_a, byte enc_b, byte ipropi, byte mtemp, bool invert = false, PIO pio = pio0);
     void begin();
     void update();
 
@@ -24,6 +24,10 @@ class SmartMotor {
     void stop();
 
     void calibrate(float target = 45.f);
+
+    float getTempMotor();
+    float getCurrent();
+    float getTempBoard();
         
   private:
     int speedToPower(float speed);

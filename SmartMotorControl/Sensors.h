@@ -6,19 +6,27 @@
 #include "definitions.h"
 #include "Constants.h"
 
-
-
 class Sensors
 {
 public:
+    Sensors(byte ipropi, byte mtemp);
     void begin();
 
-    float measureCurrent(byte IPROPI);
-    float measureTempMotor(byte MTEMP);
-    float measureTempBoard();
+    void measureCurrent();
+    void measureTempMotor();
+    void measureTempBoard();
+
+    float getCurrent();
+    float getTempMotor();
+    float getTempBoard();
 
 private:
 TMP102 tsens;
+float current;
+float tempmotor;
+float tempboard;
+
+byte ipropi, mtemp;
 
 };
 
