@@ -12,6 +12,7 @@ class Motor {
     Motor(byte pwm, byte dir, bool invert = false);
     void begin();
     void write(int value);
+    int getID();
     
   private:
     byte pwm, dir;

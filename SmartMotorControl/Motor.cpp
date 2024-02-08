@@ -27,3 +27,14 @@ void Motor::write(int value) {
   analogWrite(pwm, mot);
   digitalWrite(dir, invert ^ (value < 0));
 }
+
+//Returns the motor ID
+int Motor::getID(){
+  if(this->pwm == 24){
+    return 1;
+  } else if(this->pwm == 16){
+    return 2;
+  } else{
+    return 0;
+  }
+}

@@ -3,8 +3,12 @@
 SmartMotor motorTrLeft(DRV_TR_LEFT_PWM, DRV_TR_LEFT_DIR, ENC_TR_LEFT_A, ENC_TR_LEFT_B, IPROPI1, MTEMP1, false);
 SmartMotor motorTrRight(DRV_TR_RIGHT_PWM, DRV_TR_RIGHT_DIR, ENC_TR_RIGHT_A, ENC_TR_RIGHT_B, IPROPI2, MTEMP2, true);
 
+unsigned long prevt = 0;
+
 void setup() {
   Serial.begin(9600);
+  delay(15000);
+  Serial.println("Start setup");
   Debug.setLevel(Levels::DEBUG);  // comment to set debug verbosity to debug
 
   // initializing PWM
@@ -13,11 +17,13 @@ void setup() {
 
   // motor initialization
   motorTrLeft.begin();
-  motorTrRight.begin();
+  //motorTrRight.begin();
 
   //Calibration needs motor connected to work
-  motorTrLeft.calibrate();
-  motorTrRight.calibrate();
+  //motorTrLeft.calibrate();
+  //motorTrRight.calibrate();
+
+  delay(10000);
 
   Debug.println("BEGIN", Levels::INFO);
 }
@@ -35,7 +41,7 @@ void loop() {
 
 
 //Condition to avoid the use of delay()
-  if(millis() - t < 100){
+  if(t - prevt > 10){
   Debug.print("TRACTION DATA :  \tleft: \t");
   Debug.print(motorTrLeft.getSpeed());
   Debug.print("\tright: \t");
@@ -44,14 +50,14 @@ void loop() {
   Debug.print(motorTrLeft.getCurrent());
   Debug.print("\tright: \t");
   Debug.println(motorTrRight.getCurrent());
-  Debug.print("MOTOR TEMPERATURE DATA :  \tleft: \t");
+  Debug.print("MOTOR TEMP :  \tleft: \t");
   Debug.print(motorTrLeft.getTempMotor());
   Debug.print("\tright: \t");
   Debug.println(motorTrRight.getTempMotor());
-  Debug.print("BOARD TEMPERATURE DATA :  \tleft: \t");
+  Debug.print("BOARD TEMP : \t");
   Debug.print(motorTrLeft.getTempBoard());
-  Debug.print("\tright: \t");
-  Debug.println(motorTrRight.getTempBoard());
+  Debug.println(" °C");
+  t = prevt;
   }
 
   // Debug.println("Stopping motors.", Levels::INFO);
