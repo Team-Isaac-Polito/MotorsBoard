@@ -6,6 +6,8 @@
  * @param dir Direction pin.
  * @param enc_a Pin A of the encoder.
  * @param enc_b Pin B of the encoder.
+ * @param ipropi IPROPI pin for current feedback
+ * @param mtemp MTEMP pin for NTC connection
  * @param invert Invert motor direction, usuful when motors are mounted opposite to one another.
  * @param pio PIO to use for the encoder. Each PIO can handle up to 4 encoders.
  */
@@ -14,7 +16,8 @@ SmartMotor::SmartMotor(byte pwm, byte dir, byte enc_a, byte enc_b, byte ipropi, 
       encoder(enc_a, enc_b, new MovingAvgFilter<int>(ENC_TR_SAMPLES), invert, pio),
       pid(0.f, 0.f, 0.f, MAX_SPEED, 1.f),
       invert(invert),
-      sensors(ipropi, mtemp)
+      ipropi(ipropi),
+      mtemp(mtemp)
 {
 }
 
@@ -25,7 +28,6 @@ void SmartMotor::begin()
 {
     motor.begin();
     encoder.begin();
-    sensors.begin();
 }
 
 /**
@@ -43,37 +45,58 @@ void SmartMotor::update()
         pid_last = now;
 
         // Sensors measurements. Warning: functions get called for each motor
-        sensors.measureCurrent();
-        sensors.measureTempMotor();
-        sensors.measureTempBoard();
+        measureCurrent();
+        measureTemperature();
 
-        while (sensors.getTempMotor() > 40)
+        while (getTemperature() > 40)
         {
             motor.write(0);
-            //Serial.println("Motor overheating");
+            Debug.println("Motor overheating", Levels::WARN);
+            delay(1000);
         }
 
         // TODO:test overheating control
     }
 }
 
-// Get temperature of the motor
-float SmartMotor::getTempMotor()
+/* Temperature on the motor is given by the thermistor NTC formula.
+It only works when 12V is supplied since VREF relies on it.*/
+void SmartMotor::measureTemperature()
 {
-  return this->sensors.getTempMotor();
+  float Vm = analogRead(this->mtemp) * VREF / 1024;
+  float R = R2 * (VREF / Vm - 1); // Resistance of the NTC
+  float T = BETA / (log(R / R0) + BETA / T0);
+  this->temperature = T - 273.15;
+
+  // Linearizing this function makes the adc read a lower temperature
+  // than the real one when it rises over 70°C
 }
 
-// Get how much current the motor is drawing
-float SmartMotor::getCurrent()
+/* Current feedback is evaluated from the measurement of voltage on
+the IPROPI resistor, formula is from the driver datasheet.
+It only works when 12V is supplied to the board.*/
+void SmartMotor::measureCurrent()
 {
-  return this->sensors.getCurrent();
+  float current, current_tot;
+  int AVG = 50;
+
+  for (int i = 0; i < AVG; i++)
+  {
+    current_tot += analogRead(this->ipropi) * (3.3f / 1024) / (0.0015f * 910.f);
+    delay(10);
+  }
+
+  this->current = current_tot / AVG;
 }
 
-// Get the temperature on the board
-float SmartMotor::getTempBoard()
-{
-  return this->sensors.getTempBoard();
+float SmartMotor::getTemperature(){
+    return this->temperature;
 }
+
+float SmartMotor::getCurrent(){
+    return this->current;
+}
+
 
 /**
  * Set the desired speed of the motor.
@@ -120,20 +143,16 @@ void SmartMotor::stop()
  */
 void SmartMotor::calibrate(float target)
 {
-    delay(5000);
-    Debug.print("STARTING CALIBRATION MOTOR ");
-    Debug.println(this->motor.getID());
     float th = target + 5.f;
     float tl = target - 5.f;
 
     motor.write(PWM_MAX_VALUE);
-    delay(2000);
     Debug.println(getSpeed());
     while (getSpeed() < th){
-      Serial.println("start while");
+      //Serial.println("start while");
       delay(DT_ENC);
     }
-    Serial.println("end while");
+    //Serial.println("end while");
     int t_high = millis();
     float val_high = getSpeed();
     motor.write(0);

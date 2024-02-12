@@ -24,17 +24,10 @@ void Motor::begin() {
  */
 void Motor::write(int value) {
   int mot = constrain(abs(value), 0, PWM_MAX_VALUE);
-  analogWrite(pwm, mot);
-  digitalWrite(dir, invert ^ (value < 0));
+  int dir = invert ^ (value < 0);
+  analogWrite(dir?pwm:dir, mot);
+  digitalWrite(dir?dir:pwm, 0);
 }
 
-//Returns the motor ID
-int Motor::getID(){
-  if(this->pwm == 24){
-    return 1;
-  } else if(this->pwm == 16){
-    return 2;
-  } else{
-    return 0;
-  }
-}
+//in1 = pwm
+//in2 = dir

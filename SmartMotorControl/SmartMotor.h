@@ -7,7 +7,7 @@
 #include "TractionEncoder.h"
 #include "PID.h"
 #include "MovingAvgFilter.h"
-#include "Sensors.h"
+#include "Constants.h"
 
 /**
  * Class used to control DC motors at a constant speed.
@@ -25,9 +25,11 @@ class SmartMotor {
 
     void calibrate(float target = 45.f);
 
-    float getTempMotor();
+    void measureCurrent();
+    void measureTemperature();
+
+    float getTemperature();
     float getCurrent();
-    float getTempBoard();
         
   private:
     int speedToPower(float speed);
@@ -35,12 +37,16 @@ class SmartMotor {
     Motor motor;
     TractionEncoder encoder;
     PID pid;
-    Sensors sensors;
 
     bool invert;
     float speed;
     unsigned long enc_last;
     unsigned long pid_last;
+
+    //Feedback measured values
+    byte ipropi, mtemp;
+    float current;
+    float temperature;
 };
 
 #endif
