@@ -143,21 +143,19 @@ void SmartMotor::stop()
  */
 void SmartMotor::calibrate(float target)
 {
+    Serial.println("Start calibration");
+    delay(2000);
     float th = target + 5.f;
     float tl = target - 5.f;
 
     motor.write(PWM_MAX_VALUE);
     Debug.println(getSpeed());
-    while (getSpeed() < th){
-      //Serial.println("start while");
-      delay(DT_ENC);
-    }
-    //Serial.println("end while");
+    while (getSpeed() < th) delay(DT_ENC);
+    Serial.println("end while");
     int t_high = millis();
     float val_high = getSpeed();
     motor.write(0);
-    while (getSpeed() > tl)
-        delay(DT_ENC);
+    while (abs(getSpeed()) > tl) delay(DT_ENC);
     int t_low = millis();
     float val_low = getSpeed();
 

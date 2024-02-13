@@ -1,6 +1,9 @@
 #include "SmartMotor.h"
 #include "Sensors.h"
 
+// Define Slave I2C Address
+#define SLAVE_ADDR 48
+
 SmartMotor motorTrLeft(DRV_TR_LEFT_PWM, DRV_TR_LEFT_DIR, ENC_TR_LEFT_A, ENC_TR_LEFT_B, IPROPI1, MTEMP1, false);
 SmartMotor motorTrRight(DRV_TR_RIGHT_PWM, DRV_TR_RIGHT_DIR, ENC_TR_RIGHT_A, ENC_TR_RIGHT_B, IPROPI2, MTEMP2, true);
 
@@ -9,10 +12,22 @@ Sensors sensors;
 
 void setup()
 {
-  //Initializing I2C communication with 
+  //Initializing I2C communication with tmp102 on board sensors
   Wire.setSDA(SDA1);
   Wire.setSCL(SCL1);
   Wire.begin();
+
+  //Initializing I2C communication with Main board
+  Wire1.setSDA(8);
+  Wire1.setSCL(9);
+  // Initialize I2C communications as Slave
+  Wire1.begin(SLAVE_ADDR);
+
+  // Function to run when data requested from master
+  Wire1.onRequest(requestEvent); 
+  
+  // Function to run when data received from master
+  Wire1.onReceive(receiveEvent);
 
   Serial.begin(9600);
   delay(15000);
