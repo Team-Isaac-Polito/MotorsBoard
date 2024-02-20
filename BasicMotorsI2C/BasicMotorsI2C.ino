@@ -12,6 +12,8 @@ int m1val = 0; // 0-255 value for motor pwm control
 int m2val = 0;
 char *val;
 bool newRxData = false;
+int nbytes = 0;
+int receivedbytes = 0;
 
 void setup()
 {
@@ -40,6 +42,8 @@ void receiveEvent(int numBytesReceived)
     // --- prints are not recommended here ---
     // Serial.print("Bytes available: ");
     // Serial.println(Wire.available());
+    nbytes = Wire.available();
+    receivedbytes = nbytes;
     if (newRxData == false)
     {
         // copy the data to rxData -- currently not working -- 
@@ -49,13 +53,19 @@ void receiveEvent(int numBytesReceived)
         // Serial.print("numbytes: ");
         // Serial.println(numBytesReceived);
 
-        while (Wire.available() > 0)
+        if (nbytes == 2)
         {
             m1val = Wire.read();
+            nbytes--;
+        }
+        if (nbytes == 1){
+
+            m2val = Wire.read();
+            nbytes--;
         }
 
         //No steering for now, to be changed when can works
-        m2val = m1val;
+        //m2val = m1val;
 
         //memcpy(&m1val, &val, 4);
         //memcpy(&m2val, &val + 4, 4);
@@ -64,16 +74,16 @@ void receiveEvent(int numBytesReceived)
     else
     {
         // dump the data
-        while (Wire.available() > 0)
+        /* while (Wire.available() > 0)
         {
             byte c = Wire.read();
-        }
+        } */
     }
 }
 
 void loop()
 {
-    Serial.println(newRxData);
+    //Serial.println(newRxData);
     // ------ loop for i2c test ------
     if (newRxData == true)
     {
@@ -88,6 +98,10 @@ void loop()
         Serial.println(m1val);
         Serial.print("m2val: ");
         Serial.println(m2val);
+    }else{
+        Serial.println("No data received");
     }
-    delay(5);
+    Serial.print("Bytes available: ");
+    Serial.println(receivedbytes);
+    delay(500);
 }
