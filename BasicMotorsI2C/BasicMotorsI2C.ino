@@ -46,29 +46,23 @@ void receiveEvent(int numBytesReceived)
     receivedbytes = nbytes;
     if (newRxData == false)
     {
-        // copy the data to rxData -- currently not working -- 
+        // copy the data to rxData -- currently not working --
         // Wire.readBytes((byte *)&val, numBytesReceived);
         // Serial.print("val received: ");
         // Serial.println(val);
         // Serial.print("numbytes: ");
         // Serial.println(numBytesReceived);
 
-        if (nbytes == 2)
-        {
-            m1val = Wire.read();
-            nbytes--;
-        }
-        if (nbytes == 1){
+        bool sign = false; //True:negative False:positive
+        if(Wire.available() == 4) {sign = Wire.read();}
+        if(Wire.available() == 3) {m1val = Wire.read();}
+        if(sign) {m1val = m1val-256;}
+        if(Wire.available() == 2) {sign = Wire.read();}
+        if(Wire.available() == 1) {m2val = Wire.read();}
+        if(sign) {m2val = m2val-256;}
 
-            m2val = Wire.read();
-            nbytes--;
-        }
-
-        //No steering for now, to be changed when can works
-        //m2val = m1val;
-
-        //memcpy(&m1val, &val, 4);
-        //memcpy(&m2val, &val + 4, 4);
+        // memcpy(&m1val, &val, 4);
+        // memcpy(&m2val, &val + 4, 4);
         newRxData = true;
     }
     else
@@ -83,8 +77,8 @@ void receiveEvent(int numBytesReceived)
 
 void loop()
 {
-    //Serial.println(newRxData);
-    // ------ loop for i2c test ------
+    // Serial.println(newRxData);
+    //  ------ loop for i2c test ------
     if (newRxData == true)
     {
         Serial.println("Receive event");
@@ -98,10 +92,18 @@ void loop()
         Serial.println(m1val);
         Serial.print("m2val: ");
         Serial.println(m2val);
-    }else{
-        Serial.println("No data received");
+
+        Serial.print("Bytes available: ");
+        Serial.println(receivedbytes);
     }
-    Serial.print("Bytes available: ");
-    Serial.println(receivedbytes);
-    delay(500);
+    else
+    {
+        Serial.println("No data received");
+        receivedbytes = 0;
+
+        Serial.print("Bytes available: ");
+        Serial.println(receivedbytes);
+    }
+
+    delay(100);
 }
