@@ -8,11 +8,9 @@
 Motor m1(DRV_IN11, DRV_IN21);
 Motor m2(DRV_IN12, DRV_IN22);
 
-int m1val = 0; // 0-255 value for motor pwm control
-int m2val = 0;
-char *val;
+short int m1val = 0; // -1024,1024 value for motor pwm control
+short int m2val = 0;
 bool newRxData = false;
-int nbytes = 0;
 int receivedbytes = 0;
 
 void setup()
@@ -40,29 +38,27 @@ void setup()
 void receiveEvent(int numBytesReceived)
 {
     // --- prints are not recommended here ---
-    // Serial.print("Bytes available: ");
-    // Serial.println(Wire.available());
-    nbytes = Wire.available();
-    receivedbytes = nbytes;
+    receivedbytes = Wire.available();;
     if (newRxData == false)
     {
-        // copy the data to rxData -- currently not working --
-        // Wire.readBytes((byte *)&val, numBytesReceived);
-        // Serial.print("val received: ");
-        // Serial.println(val);
-        // Serial.print("numbytes: ");
-        // Serial.println(numBytesReceived);
 
-        bool sign = false; //True:negative False:positive
-        if(Wire.available() == 4) {sign = Wire.read();}
-        if(Wire.available() == 3) {m1val = Wire.read();}
-        if(sign) {m1val = m1val-256;}
-        if(Wire.available() == 2) {sign = Wire.read();}
-        if(Wire.available() == 1) {m2val = Wire.read();}
-        if(sign) {m2val = m2val-256;}
-
-        // memcpy(&m1val, &val, 4);
-        // memcpy(&m2val, &val + 4, 4);
+        if(Wire.available() == 4) {m1val = Wire.read(); //Read MSB
+        // Serial.print("4: ");
+        // Serial.println(m1val);
+        }
+        if(Wire.available() == 3) {m1val = (m1val << 8) | Wire.read(); //Shift left and make OR to join LSB with MSB
+        // Serial.print("3: ");
+        // Serial.println(m1val);
+        }
+        if(Wire.available() == 2) {m2val = Wire.read();
+        // Serial.print("2: ");
+        // Serial.println(m2val);
+        }
+        if(Wire.available() == 1) {m2val = (m2val << 8) | Wire.read();
+        // Serial.print("1: ");
+        // Serial.println(m2val);
+        }
+        
         newRxData = true;
     }
     else
