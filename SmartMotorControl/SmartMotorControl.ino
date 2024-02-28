@@ -18,19 +18,18 @@ void setup()
   Wire.begin();
 
   //Initializing I2C communication with Main board
-  Wire1.setSDA(8);
-  Wire1.setSCL(9);
+  //Wire1.setSDA(8);
+  //Wire1.setSCL(9);
   // Initialize I2C communications as Slave
-  Wire1.begin(SLAVE_ADDR);
+  //Wire1.begin(SLAVE_ADDR);
 
   // Function to run when data requested from master
-  Wire1.onRequest(requestEvent); 
+ // Wire1.onRequest(requestEvent); 
   
   // Function to run when data received from master
-  Wire1.onReceive(receiveEvent);
+ // Wire1.onReceive(receiveEvent);
 
   Serial.begin(9600);
-  delay(15000);
   Serial.println("Start setup");
   Debug.setLevel(Levels::DEBUG); // comment to set debug verbosity to debug
 
@@ -64,8 +63,8 @@ void loop()
   motorTrRight.update();
 
   // TODO: speed should be sent from the core managing i2c to the core managing pid
-  motorTrLeft.setSpeed(65);
-  motorTrRight.setSpeed(30);
+  motorTrLeft.setSpeed(1024);
+  motorTrRight.setSpeed(-65);
 
   // Condition to avoid the use of delay()
   if (t - prevt > 10)
@@ -95,10 +94,12 @@ void loop()
 
 }
 
+/* 
 void setup1()
 {
 }
 
 void loop1()
 {
-}
+} 
+*/

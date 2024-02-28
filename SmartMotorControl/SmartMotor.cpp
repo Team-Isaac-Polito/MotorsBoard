@@ -48,12 +48,12 @@ void SmartMotor::update()
         measureCurrent();
         measureTemperature();
 
-        while (getTemperature() > 40)
+       /*  while (getTemperature() > 40)
         {
             motor.write(0);
             Debug.println("Motor overheating", Levels::WARN);
             delay(1000);
-        }
+        } */
 
         // TODO:test overheating control
     }
@@ -143,12 +143,12 @@ void SmartMotor::stop()
  */
 void SmartMotor::calibrate(float target)
 {
-    Serial.println("Start calibration");
-    delay(2000);
+    
     float th = target + 5.f;
     float tl = target - 5.f;
 
     motor.write(PWM_MAX_VALUE);
+    delay(1000);
     Debug.println(getSpeed());
     while (getSpeed() < th) delay(DT_ENC);
     Serial.println("end while");
