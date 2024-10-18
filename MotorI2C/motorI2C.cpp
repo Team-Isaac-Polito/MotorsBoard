@@ -1,15 +1,18 @@
 #include "MotorI2C.h"
+#include "SmartMotor.h"
 
 MotorI2C::MotorI2C(int slaveAddress) {
   _slaveAddress = slaveAddress;
-  _leftSpeed = 0.0;
-  _rightSpeed = 0.0;
-  _speedL = 0.0;
-  _speedR = 0.0;
+  _leftMotor = nullptr;  // Pointer to SmartMotor instance for left motor
+  _rightMotor = nullptr; // Pointer to SmartMotor instance for right motor
+  _newDataAvailable = false;
+  _lastCommandTime = 0;
 }
 
-// Setup I2C communication
-void MotorI2C::setupI2C() {
+// Setup I2C communication and initialize motors
+void MotorI2C::setupI2C(SmartMotor* leftMotor, SmartMotor* rightMotor) {
+  _leftMotor = leftMotor;
+  _rightMotor = rightMotor;
   Wire.begin(_slaveAddress);  // Initialize the I2C as a slave
   Wire.onReceive(receiveData);  // Set the receive function to handle incoming data
   Wire.onRequest(sendTelemetry); // Set the request function to handle telemetry data
@@ -17,40 +20,42 @@ void MotorI2C::setupI2C() {
 
 // Function to receive data from the main board
 void MotorI2C::receiveData(int numBytes) {
-  if (Wire.available() >= 2 * sizeof(float)) {  // Expect two floats (leftSpeed, rightSpeed)
-    _leftSpeed = Wire.read(); // Read left motor speed
-    _rightSpeed = Wire.read(); // Read right motor speed
-    
-    // Now set the motor speeds accordingly
-    setMotorSpeeds(_leftSpeed, _rightSpeed);
+  if (numBytes >= 2 * sizeof(float)) {  // Expect two floats (leftSpeed, rightSpeed)
+    float leftSpeed, rightSpeed;
+    Wire.readBytes((char*)&leftSpeed, sizeof(float));  // Read left motor speed
+    Wire.readBytes((char*)&rightSpeed, sizeof(float)); // Read right motor speed
+
+    // Store the speeds and mark new data as available
+    _leftMotor->setSpeed(leftSpeed);
+    _rightMotor->setSpeed(rightSpeed);
+    _newDataAvailable = true;
+    _lastCommandTime = millis();  // Update the time of the last received command
   }
 }
 
 // Function to send telemetry (current speeds) back to the main board
 void MotorI2C::sendTelemetry() {
-  _speedL = getMotorSpeedL();
-  _speedR = getMotorSpeedR();
-  
+  float leftSpeed = _leftMotor->getSpeed();
+  float rightSpeed = _rightMotor->getSpeed();
+
   // Send back two floats (current speeds)
-  Wire.write((byte*)&_speedL, sizeof(float));
-  Wire.write((byte*)&_speedR, sizeof(float));
+  Wire.write((byte*)&leftSpeed, sizeof(float));
+  Wire.write((byte*)&rightSpeed, sizeof(float));
 }
 
-// Set the speed of both motors
-void MotorI2C::setMotorSpeeds(float leftSpeed, float rightSpeed) {
-  // Logic to control the motors goes here
-  // e.g., motorTrLeft.setSpeed(leftSpeed);
-  // e.g., motorTrRight.setSpeed(rightSpeed);
-}
+// Function to be called in the main loop for regular updates
+void MotorI2C::loopUpdate() {
+  // If new data has been received, update the motor control
+  if (_newDataAvailable) {
+    _leftMotor->update();
+    _rightMotor->update();
+    _newDataAvailable = false;
+  }
 
-// Get the left motor speed (telemetry)
-float MotorI2C::getMotorSpeedL() {
-  // Logic to retrieve the actual left motor speed
-  return _leftSpeed;  // Placeholder, replace with actual telemetry data
-}
-
-// Get the right motor speed (telemetry)
-float MotorI2C::getMotorSpeedR() {
-  // Logic to retrieve the actual right motor speed
-  return _rightSpeed;  // Placeholder, replace with actual telemetry data
+  // Check if the motors should be stopped due to timeout
+  unsigned long currentTime = millis();
+  if (currentTime - _lastCommandTime > MOTOR_TIMEOUT) {
+    _leftMotor->stop();
+    _rightMotor->stop();
+  }
 }
