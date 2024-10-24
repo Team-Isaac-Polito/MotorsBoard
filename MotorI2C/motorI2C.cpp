@@ -9,7 +9,11 @@ MotorI2C::MotorI2C(int slaveAddress) {
   _lastCommandTime = 0;
 }
 
-// Setup I2C communication and initialize motors
+/**
+ * Setup I2C communication and initialise motors.
+ * @param leftMotor instance of SmartMotor to be used as left motor. 
+ * @param leftMotor instance of SmartMotor to be used as right motor. 
+ */
 void MotorI2C::setupI2C(SmartMotor* leftMotor, SmartMotor* rightMotor) {
   _leftMotor = leftMotor;
   _rightMotor = rightMotor;
