@@ -8,18 +8,20 @@
 
 class MotorI2C {
   public:
-    MotorI2C(int slaveAddress);
-    void setupI2C(SmartMotor* leftMotor, SmartMotor* rightMotor); // Setup I2C and initialize motors
+    MotorI2C(TwoWire& wire, int slaveAddress);
+    void begin(); // Initialize I2C
     void receiveData(int numBytes);        // Receive speed data from the main board
     void sendTelemetry();                 // Send telemetry (speed) data back to the main board
-    void loopUpdate();                    // Regular update function to be called in the main loop
+    bool isAvailable(float* leftSpeed, float* rightSpeed);  // Check if new data is available
+    void checkSafety(SmartMotor* leftMotor, SmartMotor* rightMotor);  // Check for motor timeout
 
   private:
-    int _slaveAddress;
-    SmartMotor* _leftMotor;               // Pointer to left motor
-    SmartMotor* _rightMotor;              // Pointer to right motor
-    bool _newDataAvailable;               // Flag to indicate new data has been received
-    unsigned long _lastCommandTime;       // Time of the last received command
+    TwoWire& wireInstance;
+    int slaveAddress;
+    float receivedLeftSpeed;              // Received left motor speed
+    float receivedRightSpeed;             // Received right motor speed
+    bool newDataAvailable;                // Flag to indicate new data has been received
+    unsigned long lastCommandTime;        // Time of the last received command
 };
 
 #endif
