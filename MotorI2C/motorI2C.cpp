@@ -1,6 +1,4 @@
-#include <Wire.h>
 #include "MotorI2C.h"
-#include "SmartMotor.h"
 
 // Create a custom I2C instance for the Pico (as slave)
 TwoWire I2C_Slave = TwoWire(0);  // Use bus 0 for the I2C
