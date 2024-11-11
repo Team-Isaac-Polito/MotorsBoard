@@ -1,10 +1,12 @@
 /* MotorsBoard code to test motors, current feedback, 
 temperature sensors on board and on the motor*/
 
+#include <Arduino.h>
 #include <Wire.h>
 #include <SparkFunTMP102.h>
+#include <Motor.h>
 #include "pin_definitions.h"
-#include "Motor.h"
+#include "Constants.h"
 
 
 TMP102 tsens;
@@ -40,8 +42,8 @@ void measureTempMotor(byte MTEMP){
 void setup() {
   Serial.begin(115200);
 
-  Wire.setSDA(SDA1);
-  Wire.setSCL(SCL1);
+  /*Wire.setSDA(SDA1);
+  Wire.setSCL(SCL1);*/
   Wire.begin();
 
   if(!tsens.begin())
