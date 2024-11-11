@@ -1,5 +1,8 @@
+#include <Arduino.h>
 #include "SmartMotor.h"
 #include "Sensors.h"
+#include "pin_definitions.h"
+
 
 // Define Slave I2C Address
 #define SLAVE_ADDR 48

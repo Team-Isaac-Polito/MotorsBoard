@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <Wire.h>
 #include "Motor.h"
 #include "pin_definitions.h"
