@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "pin_definitions.h"
 #include "Motor.h"
 #include "TractionEncoder.h"
